@@ -26,8 +26,7 @@ public class UsageExample {
     }
 
     public static void main(String[] args) {
-        //new UsageExample("benchmark.js", 1500, BenchmarRanking::rankTestSuite).run();
-        new UsageExample("moodle.js", 1500, BenchmarRanking::rankTestSuite).run();
+        new UsageExample("benchmark.js", 1500, BenchmarRanking::rankTestSuite).run();
     }
 
     public void run() {
