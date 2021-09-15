@@ -41,13 +41,13 @@ ctx.bthread('T2rLoss', 't2r_loss', function (entity) {
   }
 })
 
-ctx.bthread('R2tReorder', 'r2t_reordered', function (entity) {
+ctx.bthread('R2tReorder', 'r2t_reorder', function (entity) {
   while (true) {
     sync({request: Event('r2tReorder')})
   }
 })
 
-ctx.bthread('T2rReorder', 't2r_reordered', function (entity) {
+ctx.bthread('T2rReorder', 't2r_reorder', function (entity) {
   while (true) {
     sync({request: Event('t2rReorder')})
   }
@@ -120,10 +120,10 @@ ctx.registerQuery('t2r_loss', function (entity) {
 ctx.registerQuery('r2t_loss', function (entity) {
   return entity.r2t.length > 0 && entity.CHN_LOSS
 })
-ctx.registerQuery('t2r_reordered', function (entity) {
+ctx.registerQuery('t2r_reorder', function (entity) {
   return entity.t2r.length > 0 && entity.CHN_REORDERED
 })
-ctx.registerQuery('r2t_reordered', function (entity) {
+ctx.registerQuery('r2t_reorder', function (entity) {
   return entity.r2t.length > 0 && entity.CHN_REORDERED
 })
 

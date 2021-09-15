@@ -3,6 +3,9 @@ package il.ac.bgu.cs.bp.bpjs.suitegen;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -27,7 +30,7 @@ public class UsageExample {
 
     public static void main(String[] args) {
         String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
-        new UsageExample("abp.js", 1500, BenchmarRanking::rankTestSuite).run();
+        new UsageExample("abp.js", 100, BenchmarRanking::rankTestSuite).run();
     }
 
     public void run() {
@@ -54,11 +57,24 @@ public class UsageExample {
             var testSuite = optimizer.optimize(samples, 10, rankingFunction);
 
             reportDuration();
-
             out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuite(testSuite));
             for (var test : testSuite) {
                 out.println("\t" + test.stream().map(e -> e.name).collect(Collectors.joining(",")));
             }
+
+            try {
+                String fileName = "BestTestSuite.txt";
+
+                FileWriter writer = new FileWriter(fileName, false);
+                for (var test : testSuite) {
+                    writer.write("\t" + test.stream().map(e -> e.name).collect(Collectors.joining(",")));
+                    writer.write("\r\n"); // write new line
+                }
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
 
         if(statistics.average != 0)
