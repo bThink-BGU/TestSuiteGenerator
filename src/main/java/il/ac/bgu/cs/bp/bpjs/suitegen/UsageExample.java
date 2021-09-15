@@ -5,10 +5,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.System.out;
 
@@ -26,7 +26,8 @@ public class UsageExample {
     }
 
     public static void main(String[] args) {
-        new UsageExample("benchmark.js", 1500, BenchmarRanking::rankTestSuite).run();
+        String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
+        new UsageExample("abp.js", 1500, BenchmarRanking::rankTestSuite).run();
     }
 
     public void run() {
@@ -75,7 +76,7 @@ public class UsageExample {
 
     static class BenchmarRanking {
         @NotNull
-        static final BEvent GOAL = new BEvent("*");
+        static final BEvent GOAL = new BEvent("success");
 
         static class RankingCriteria {
             public RankingCriteria(boolean reachedGoal) {
@@ -86,10 +87,31 @@ public class UsageExample {
         }
 
         static public int rankTestSuite(@NotNull Set<List<BEvent>> testSuite) {
-            return (int) testSuite.stream()
-                    .filter(test -> rankAnIndividualTest(test).reachedGoal)
-                    .count();
+
+            ArrayList<String> list = new ArrayList<String>();
+            Map<String, Integer> hm = new HashMap<String, Integer>();
+
+            testSuite.stream().forEach(elem -> elem.forEach(subelem -> list.add(subelem.getName())) ); //cat-2, fat-3
+            hm.clear();
+            for (String i : list) {
+                if (i.startsWith("Goal")) {
+                    Integer j = hm.get(i);
+                    hm.put(i, (j == null) ? 1 : j + 1);
+                }
+            }
+//            int j = 0;
+//            for (Map.Entry<String, Integer> val : hm.entrySet()) {
+//                j+=1;
+//                System.out.println("Element " +j+ " -"+ val.getKey() + " "
+//                        + "occurs"
+//                        + ": " + val.getValue() + " times");
+//            }
+//            out.println("hm-"+hm.size()+" j-"+j+" "+hm);
+
+            return (hm.size()/81)*10;
+
         }
+
 
         private @NotNull
         static UsageExample.BenchmarRanking.RankingCriteria rankAnIndividualTest(@NotNull List<BEvent> test) {

@@ -1,8 +1,11 @@
 package il.ac.bgu.cs.bp.bpjs.suitegen;
 
+import il.ac.bgu.cs.bp.bpjs.context.ContextBProgram;
+import il.ac.bgu.cs.bp.bpjs.context.PrintCOBProgramRunnerListener;
 import il.ac.bgu.cs.bp.bpjs.execution.BProgramRunner;
 import il.ac.bgu.cs.bp.bpjs.execution.listeners.InMemoryEventLoggingListener;
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
+import il.ac.bgu.cs.bp.bpjs.model.BProgram;
 import il.ac.bgu.cs.bp.bpjs.model.ResourceBProgram;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,7 +22,9 @@ public class TestSampler {
         int previous_size = 0;
 
         while (samples.size() < SAMPLE_SIZE && not_growing_counter < 10) {
-            ResourceBProgram program = new ResourceBProgram(bprogramname);
+//            ResourceBProgram program = new ResourceBProgram(bprogramname);
+            BProgram program = new ContextBProgram(bprogramname);
+
             program.setEventSelectionStrategy(new GoalDrivenEventSelectionStrategy(WISH_PROBABILITY, OBJECT_PROBABILITY));
 
             var runner = new BProgramRunner(program);
