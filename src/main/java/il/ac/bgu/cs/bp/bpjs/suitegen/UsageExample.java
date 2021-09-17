@@ -30,7 +30,7 @@ public class UsageExample {
 
     public static void main(String[] args) {
         String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
-        new UsageExample("abp.js", 100, BenchmarRanking::rankTestSuite).run();
+        new UsageExample("abp.js", 1500, BenchmarRanking::rankTestSuite).run();
     }
 
     public void run() {
@@ -50,10 +50,11 @@ public class UsageExample {
 
         var optimizers = List.of(
                 new BruteForceOptimizer(50000, statistics),
-                new GeneticOptimizer(0.7, 0.3, 100, 10));
+                new GeneticOptimizer(0.7, 0.3, 200, 10));
 
         for (var optimizer : optimizers) {
 
+//            var testSuite = optimizer.optimize(samples, 10, rankingFunction);
             var testSuite = optimizer.optimize(samples, 10, rankingFunction);
 
             reportDuration();
@@ -122,9 +123,8 @@ public class UsageExample {
 //                        + "occurs"
 //                        + ": " + val.getValue() + " times");
 //            }
-//            out.println("hm-"+hm.size()+" j-"+j+" "+hm);
-
-            return (hm.size()/81)*10;
+//            out.println("hm-"+hm.size()+" new rank-"+hm.values().stream().filter(x->x>8).count());
+            return ((int)hm.values().stream().filter(x->x>8).count()*10/hm.size());
 
         }
 

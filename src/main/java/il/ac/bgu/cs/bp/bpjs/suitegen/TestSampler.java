@@ -28,7 +28,6 @@ public class TestSampler {
             program.setEventSelectionStrategy(new GoalDrivenEventSelectionStrategy(WISH_PROBABILITY, OBJECT_PROBABILITY));
 
             var runner = new BProgramRunner(program);
-
             var eventLogger = runner.addListener(new InMemoryEventLoggingListener());
             runner.run();
             samples.add(eventLogger.getEvents());
