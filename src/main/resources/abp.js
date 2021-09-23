@@ -63,7 +63,7 @@ ctx.bthread('T_success', 'T_SUCCESS', function (entity) {
 //    AcceptingState.Stopping()
 //  }
 // -----------------------------------
-//    sync({block: bp.all})
+   sync({block: bp.all})
 })
 ctx.bthread('T_dup_error', 'T_DUP_ERROR', function (entity) {
   sync({request: Event('dup_error')})
@@ -240,8 +240,8 @@ ctx.registerEffect('doR2tReorder', function () {
 //-------------------------------------------------------
 var event1, event2
 var eventList = ['send', 'ackOk', 'ackNok', 'recAck', 'recNak', 'r2tLoss', 't2rLoss', 'r2tReorder',
-  't2rReorder', 'success', 'dup_error', 'lostError']
-bthread('GenerateKohnCTD', function () {
+  't2rReorder']
+
   for ( event1 of eventList) {
     for (event2 of eventList ){
 
@@ -250,6 +250,7 @@ bthread('GenerateKohnCTD', function () {
 
           sync({waitFor: bp.Event(eventA)})
           sync({waitFor: bp.Event(eventB)})
+
           var goal = 'Goal' + eventA + eventB
           // sync({request: bp.Event(goal), block: bp.Event(goal).negate()})
           sync({request: bp.Event(goal)})
@@ -258,5 +259,4 @@ bthread('GenerateKohnCTD', function () {
       f(event1, event2)
     }
   }
-})
 
