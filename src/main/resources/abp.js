@@ -1,4 +1,15 @@
 bp.log.setLevel("Off");
+//---------------------------------------------
+// bthread('DataToBeSend', function (entity) {
+//   sync({request: bp.Event('dataToBeSend', {info:"A"}), block: bp.Event('dataToBeSend', {info:"A"}).negate()})
+//   sync({request: bp.Event('dataToBeSend', {info:"B"}), block: bp.Event('dataToBeSend', {info:"B"}).negate()})
+//   sync({request: bp.Event('dataToBeSend', {info:"C"})})
+//   sync({request: bp.Event('dataToBeSend', {info:"D"})})
+//   sync({request: bp.Event('dataToBeSend', {info:"E"})})
+//   sync({request: bp.Event('dataToBeSend', {info:"V"})})
+// })
+
+//----------------------------------------
 
 ctx.bthread('Send', 't_send', function (entity) {
   while (true) {
@@ -53,7 +64,6 @@ ctx.bthread('T2rReorder', 't2r_reorder', function (entity) {
     sync({request: Event('t2rReorder')})
   }
 })
-
 ctx.bthread('T_success', 'T_SUCCESS', function (entity) {
   sync({request: Event('success')})
   bp.log.info("Effect for success, e={0}", entity);
@@ -63,7 +73,18 @@ ctx.bthread('T_success', 'T_SUCCESS', function (entity) {
 //    AcceptingState.Stopping()
 //  }
 // -----------------------------------
-   sync({block: bp.all})
+//    sync({block: bp.all})
+})
+  ctx.bthread('T_fail', 'T_FAIL', function (entity) {
+    sync({request: Event('fail TBS='+entity.TO_BE_SEND.toString()+" Rcv="+entity.received.toString())})
+    bp.log.info("Effect for fail, e={0}", entity);
+
+//  if (use_accepting_states) {
+//    // AcceptingState.Continuing()
+//    AcceptingState.Stopping()
+//  }
+// -----------------------------------
+//    sync({block: bp.all})
 })
 ctx.bthread('T_dup_error', 'T_DUP_ERROR', function (entity) {
   sync({request: Event('dup_error')})
@@ -71,7 +92,7 @@ ctx.bthread('T_dup_error', 'T_DUP_ERROR', function (entity) {
 //    // AcceptingState.Continuing()
 //    AcceptingState.Stopping()
 //  }
-   sync({block: bp.all})
+//    sync({block: bp.all})
 })
 ctx.bthread('T_lost_error', 'T_LOST_ERROR', function (entity) {
   sync({request: Event('lostError')})
@@ -79,7 +100,7 @@ ctx.bthread('T_lost_error', 'T_LOST_ERROR', function (entity) {
 //    // AcceptingState.Continuing()
 //    AcceptingState.Stopping()
 //  }
-   sync({block: bp.all})
+//    sync({block: bp.all})
 })
 
 //----------------------------------------
@@ -117,21 +138,24 @@ ctx.registerQuery('r_recNak', function (entity) {
   return entity.t2r.length > 0 && entity.t2r[0][0] != entity.r_seq && entity.r2t.length < entity.CHN_SIZE
 })
 ctx.registerQuery('t2r_loss', function (entity) {
-  return entity.t2r.length > 0 && entity.CHN_LOSS
+  return entity.t2r.length > 1 && entity.CHN_LOSS
 })
 ctx.registerQuery('r2t_loss', function (entity) {
   return entity.r2t.length > 0 && entity.CHN_LOSS
 })
 ctx.registerQuery('t2r_reorder', function (entity) {
-  return entity.t2r.length > 0 && entity.CHN_REORDERED
+  return entity.t2r.length > 1 && entity.CHN_REORDERED
 })
 ctx.registerQuery('r2t_reorder', function (entity) {
-  return entity.r2t.length > 0 && entity.CHN_REORDERED
+  return entity.r2t.length > 1 && entity.CHN_REORDERED
 })
 
 ctx.registerQuery('T_SUCCESS', function (entity) {
-  return entity.received.toString() == entity.TO_BE_SEND.toString()
+  return entity.send_next == entity.TO_BE_SEND.length && entity.TO_BE_SEND.toString() == entity.received.toString()
 })
+  ctx.registerQuery('T_FAIL', function (entity) {
+    return entity.send_next==entity.TO_BE_SEND.length && entity.received.toString() != entity.TO_BE_SEND.toString()
+  })
 ctx.registerQuery('T_DUP_ERROR', function (entity) {
   return entity.received.filter(x => x == 'a').length > 1 || entity.received.filter(x => x == 'b').length > 1 || entity.received.filter(x => x == 'c').length > 1
 })
@@ -208,7 +232,6 @@ ctx.registerEffect('r2tReorder', function (e) {
   // bp.log.info("Effect for r2tReorder, e={0}", e);
   ctx.updateEntity(e)
 })
-
 ctx.registerEffect('dataToBeSend', function (eventData) {
   e = ctx.getEntityById('abpData')
   e.TO_BE_SEND.push(eventData.info)
@@ -242,21 +265,43 @@ var event1, event2
 var eventList = ['send', 'ackOk', 'ackNok', 'recAck', 'recNak', 'r2tLoss', 't2rLoss', 'r2tReorder',
   't2rReorder']
 
-  for ( event1 of eventList) {
-    for (event2 of eventList ){
+// for ( event1 of eventList) {
+//   for (event2 of eventList ){
+//
+//     f = function(eventA, eventB) {
+//       bthread('k' + eventA + eventB, function () {
+//
+//         sync({waitFor: bp.Event(eventA)})
+//         sync({waitFor: bp.Event(eventB)})
+//
+//         var goal = 'Goal' + eventA + eventB
+//         // sync({request: bp.Event(goal), block: bp.Event(goal).negate()})
+//         sync({request: bp.Event(goal)})
+//       })
+//     }
+//     f(event1, event2)
+//   }
+// }
 
-      f = function(eventA, eventB) {
-        bthread('k' + eventA + eventB, function () {
+//////
 
-          sync({waitFor: bp.Event(eventA)})
-          sync({waitFor: bp.Event(eventB)})
-
-          var goal = 'Goal' + eventA + eventB
-          // sync({request: bp.Event(goal), block: bp.Event(goal).negate()})
-          sync({request: bp.Event(goal)})
-        })
-      }
-      f(event1, event2)
-    }
-  }
-
+// for ( var i=1; i<=3; i++) {
+//     for (event1 of eventList) {
+//       for (event2 of eventList) {
+//
+//         f = function (eventA, eventB, ii) {
+//           bthread('k' + eventA + eventB, function () {
+//
+//
+//             for( var c=0; c<ii; c++) sync({waitFor: bp.Event(eventA)})
+//             sync({waitFor: bp.Event(eventB)})
+//
+//             var goal = 'Goal:' + ii + "x" + eventA + "->"+ eventB
+//             // sync({request: bp.Event(goal), block: bp.Event(goal).negate()})
+//             sync({request: bp.Event(goal)})
+//           })
+//         }
+//         f(event1, event2, i)
+//       }
+//     }
+// }

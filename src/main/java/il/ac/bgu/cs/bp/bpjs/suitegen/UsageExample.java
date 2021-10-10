@@ -2,10 +2,7 @@ package il.ac.bgu.cs.bp.bpjs.suitegen;
 
 import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.TestOnly;
-import org.junit.Test;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
@@ -21,25 +18,17 @@ import static java.lang.System.out;
 public class UsageExample {
     private final String programName;
     private final int SAMPLE_SIZE;
-    private final Function<Set<List<BEvent>>, Integer> rankingFunction;
     Instant now = Instant.now();
 
     UsageExample(String programName, int SAMPLE_SIZE, Function<Set<List<BEvent>>, Integer> rankingFunction) {
         this.programName = programName;
         this.SAMPLE_SIZE = SAMPLE_SIZE;
-        this.rankingFunction = rankingFunction;
     }
 
     public static void main(String[] args) {
-//        out.println(BenchmarRanking.rankTestSuite(
-//                Set.of(
-//                        List.of(new BEvent("GoalA"), new BEvent("GoalB")),
-//                        List.of(new BEvent("GoalA"), new BEvent("GoalB"),  new BEvent("GoalC"))
-//                )));
-//        System.exit(0);
 
         String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
-        new UsageExample("abp.js", 50, BenchmarRanking::rankTestSuite).run();
+        new UsageExample("abp.js", 100, BenchmarRanking::rankTestSuiteExtendedKhun).run();
     }
 
     public void run() {
@@ -50,6 +39,7 @@ public class UsageExample {
 
         var samples = TestSampler.generateRandomRunsOf(
                 programName, SAMPLE_SIZE, 0.5, 0.5);
+//        samples = goalLogic.goalFindSuite(samples);
 
         reportDuration();
 
@@ -58,18 +48,19 @@ public class UsageExample {
         BruteForceOptimizer.Statistics statistics = new BruteForceOptimizer.Statistics();
 
         var optimizers = List.of(
-                new BruteForceOptimizer(50000, statistics),
+                new BruteForceOptimizer(10000, statistics),
                 new GeneticOptimizer(0.7, 0.3, 200, 10));
 
         for (var optimizer : optimizers) {
 
 //            var testSuite = optimizer.optimize(samples, 10, rankingFunction);
-            var testSuite = optimizer.optimize(samples, 10, rankingFunction);
+            var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteExtendedKhun);
 
             reportDuration();
-            out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuite(testSuite));
+
+            out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteExtendedKhun(testSuite));
             for (var test : testSuite) {
-                out.println("\t" + test.stream().map(e -> e.name).collect(Collectors.joining(",")));
+                out.println("\t" + test.stream().map(e -> e.name).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
             }
 
             try {
@@ -77,15 +68,32 @@ public class UsageExample {
 
                 FileWriter writer = new FileWriter(fileName, false);
                 for (var test : testSuite) {
-                    writer.write("\t" + test.stream().map(e -> e.name).collect(Collectors.joining(",")));
+//                    writer.write(test.stream().map(e -> e.name.startsWith("Goal") ? "" : e.name ).collect(Collectors.joining(",")));
+                    writer.write(test.stream().map(e -> e.name).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
                     writer.write("\r\n"); // write new line
                 }
                 writer.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
+
+        var khunCriterion = new KhunCriterion(10000);
+        var khunTestSuite = khunCriterion.candidateSuite(samples, 10, BenchmarRanking::rankTestSuiteKhun, statistics.average);
+
+        try {
+            String fileName = "KhunTestSuite.txt";
+
+            FileWriter writer = new FileWriter(fileName, false);
+            for (var test : khunTestSuite) {
+                writer.write(test.stream().map(e -> e.name).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
+                writer.write("\r\n"); // write new line
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
 
         if (statistics.average != 0)
             out.printf("// Average score of a random suite is %f%n", statistics.average);
@@ -111,8 +119,11 @@ public class UsageExample {
 
             final boolean reachedGoal;
         }
-
+        //rankTestSuiteOld - original ranking test suite - find the suite that at least each GOAL events appears 9 times
         static public int rankTestSuiteOld(@NotNull Set<List<BEvent>> testSuite) {
+            GoalFind goalLogic = new GoalFind();
+
+            testSuite = goalLogic.goalFindSuite(testSuite);
 
             ArrayList<String> list = new ArrayList<String>();
             Map<String, Integer> hm = new HashMap<String, Integer>();
@@ -125,27 +136,45 @@ public class UsageExample {
                     hm.put(i, (j == null) ? 1 : j + 1);
                 }
             }
-            int j = 0;
-            for (Map.Entry<String, Integer> val : hm.entrySet()) {
-                j += 1;
-                System.out.println("Element " + j + " -" + val.getKey() + " "
-                        + "occurs"
-                        + ": " + val.getValue() + " times");
-            }
-            out.println("hm-" + hm.size() + " new rank-" + hm.values().stream().filter(x -> x > 8).count());
+//            int j = 0;
+//            for (Map.Entry<String, Integer> val : hm.entrySet()) {
+//                j += 1;
+//                System.out.println("Element " + j + " -" + val.getKey() + " "
+//                        + "occurs"
+//                        + ": " + val.getValue() + " times");
+//            }
+//            out.println("hm-" + hm.size() + " new rank-" + hm.values().stream().filter(x -> x > 8).count());
             return ((int) hm.values().stream().filter(x -> x > 8).count() * 10 / hm.size());
 
         }
+        //rankTestSuiteExtendedKhun - find all pairs of events
+        static public int rankTestSuiteExtendedKhun(@NotNull Set<List<BEvent>> testSuite) {
+            GoalFind goalLogic = new GoalFind();
+            testSuite = goalLogic.goalFindSuite(testSuite);
 
+            var s1 = testSuite.stream().flatMap(test -> {
+                Stream<BEvent> goal = test.stream().filter(e -> e.name.startsWith("Goal"));
+                Stream<String> features = goal.map(g -> g.name + "::" + test.stream().filter(e -> e.name.equals(g.name)).count());
+//                out.println("//"+features.collect(Collectors.toList()));
+                return features;
+            });
+            var set = s1.collect(Collectors.toSet());
+//            out.println(set);
+            return set.size();
+        }
+
+        //rankTestSuiteKhun - find all pairs of events
         static public int rankTestSuiteKhun(@NotNull Set<List<BEvent>> testSuite) {
+            GoalFind goalLogic = new GoalFind();
+            testSuite = goalLogic.goalFindSuite(testSuite);
+
             var s1 = testSuite.stream().flatMap(test -> test.stream().filter(e -> e.name.startsWith("Goal")));
             var set = s1.collect(Collectors.toSet());
 //            out.println(set);
-
             return set.size();
-
         }
-        //Minimum Criteria
+
+        //Minimum Criteria -
         static public int rankTestSuite(@NotNull Set<List<BEvent>> testSuite) {
             var s1 = testSuite.stream().map(
                     test -> test.stream().filter(e -> e.name.startsWith("Goal")).collect(Collectors.toSet()).size()
