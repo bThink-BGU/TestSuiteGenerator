@@ -64,23 +64,22 @@ public class AbpSender {
             case SEND:
                 if (haveToSend())  {
                     sendData(TO_BE_SENT.get(sendNext));
-                    System.out.println("//Send-" + TO_BE_SENT.get(sendNext)+" "+infra.toString()+" tSeq-"+tSeq);
+//                    System.out.println("//Send-" + TO_BE_SENT.get(sendNext)+" "+infra.toString()+" tSeq-"+tSeq);
                 }
                 else {
-                    System.out.println("//No Send "+infra.toString()+" tSeq-"+tSeq);
-
-//                    throw new RuntimeException("fail to //send-" + TO_BE_SENT.get(sendNext));
+//                    System.out.println(//No Send "+infra.toString()+" tSeq-"+tSeq);
+                    throw new RuntimeException("fail to //send-" + TO_BE_SENT.get(sendNext));
                 }
 
                 break;
             case ACKOK:
                 if (getAckOk()) {
                         receivedAckOk();
-                    System.out.println("//receivedAckOk "+infra.toString()+" tSeq-"+tSeq+" ");
+//                    System.out.println("//receivedAckOk "+infra.toString()+" tSeq-"+tSeq+" ");
                 }
                 else {
-                    System.out.println("//No receivedAckOk "+infra.toString()+" tSeq-"+tSeq+" ");
-//                    throw new RuntimeException("fail to //receivedAckOk");
+//                    System.out.println("//No receivedAckOk "+infra.toString()+" tSeq-"+tSeq+" ");
+                    throw new RuntimeException("fail to //receivedAckOk");
                 }
 
                 break;
@@ -88,45 +87,46 @@ public class AbpSender {
                 if (getAckNok()) {
 //                    if (infra.prevInput != AbpInfra.externalInput.R2TREORDER)
                         receiveAckNok();
-                    System.out.println("//receiveAckNok "+infra.toString()+" tSeq-"+tSeq+" ");
+//                    System.out.println("//receiveAckNok "+infra.toString()+" tSeq-"+tSeq+" ");
                 }
                 else {
-                    System.out.println("//No receiveAckNok "+infra.toString()+" tSeq-"+tSeq+" ");
-//                    throw new RuntimeException("fail to //receiveAckNok");
+//                    System.out.println("//No receiveAckNok "+infra.toString()+" tSeq-"+tSeq+" ");
+                    throw new RuntimeException("fail to //receiveAckNok");
                 }
                 break;
             case T2RLOSS:
                 if (ifLostT2r()) {
                     lostT2r();
-                    System.out.println("//T2RLOSS "+infra.toString()+" tSeq-"+tSeq+" ");
+//                    System.out.println("//T2RLOSS "+infra.toString()+" tSeq-"+tSeq+" ");
                 }
                 else {
-                    System.out.println("//No T2RLOSS "+infra.toString()+" tSeq-"+tSeq+" ");
-//                    throw new RuntimeException("fail to //T2RLOSS");
+//                    System.out.println("//No T2RLOSS "+infra.toString()+" tSeq-"+tSeq+" ");
+                    throw new RuntimeException("fail to //T2RLOSS");
                 }
                 break;
             case T2RREORDER:
                 if (ifReorderT2r()) {
                     reorderT2r();
-                    System.out.println("//T2RREORDER "+infra.toString()+" tSeq-"+tSeq+" ");
+//                    System.out.println("//T2RREORDER "+infra.toString()+" tSeq-"+tSeq+" ");
                 }
                 else {
-                    System.out.println("//No T2RREORDER "+infra.toString()+" tSeq-"+tSeq+" ");
+//                    System.out.println("//No T2RREORDER "+infra.toString()+" tSeq-"+tSeq+" ");
 //                    System.out.println("Received-"+infra.received.toString());
-//                    throw new RuntimeException("fail to //T2RREORDER");
+                    throw new RuntimeException("fail to //T2RREORDER");
                 }
                 break;
             case FINISH:
                 if (sendNext == TO_BE_SENT.size()){
                     if (chckEndingStatus()) {
-                        System.out.println("//Success - TO_BE_SEND-"+TO_BE_SENT+" Received-"+infra.received+" "+infra.toString()+" tSeq-"+tSeq+" ");
+//                        System.out.println("//Success - TO_BE_SEND-"+TO_BE_SENT+" Received-"+infra.received+" "+infra.toString()+" tSeq-"+tSeq+" ");
                         senderState = FINISH;
                     }
-                    else
-                        System.out.println("//Failed- "+infra.received);
+                    else {
+//                        System.out.println("//Failed- " + infra.received);
+                    }
                 }
                 else{
-                    System.out.println("//Fail - received-"+infra.received+" sendNext-"+sendNext+" size()-"+TO_BE_SENT.size());
+//                    System.out.println("//Fail - received-"+infra.received+" sendNext-"+sendNext+" size()-"+TO_BE_SENT.size());
                 }
                 break;
 

@@ -48,17 +48,16 @@ public class UsageExample {
         BruteForceOptimizer.Statistics statistics = new BruteForceOptimizer.Statistics();
 
         var optimizers = List.of(
-                new BruteForceOptimizer(10000, statistics),
+//                new BruteForceOptimizer(10000, statistics),
                 new GeneticOptimizer(0.7, 0.3, 200, 10));
 
         for (var optimizer : optimizers) {
 
-//            var testSuite = optimizer.optimize(samples, 10, rankingFunction);
-            var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteExtendedKhun);
+            var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteZero);
 
             reportDuration();
 
-            out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteExtendedKhun(testSuite));
+            out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteZero(testSuite));
             for (var test : testSuite) {
                 out.println("\t" + test.stream().map(e -> e.name).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
             }
@@ -180,6 +179,9 @@ public class UsageExample {
                     test -> test.stream().filter(e -> e.name.startsWith("Goal")).collect(Collectors.toSet()).size()
             );
             return s1.reduce(Integer::min).get();
+        }
+        static public int rankTestSuiteZero(@NotNull Set<List<BEvent>> testSuite) {
+            return 0;
         }
 
 

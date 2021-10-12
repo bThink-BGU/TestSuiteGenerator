@@ -10,6 +10,9 @@ import java.util.stream.Stream;
 
 public class RunTestSuite {
 
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     public static void main(final String[] args) throws Exception {
 
@@ -21,7 +24,6 @@ public class RunTestSuite {
 
 //        try (BufferedReader br = new BufferedReader(new FileReader("KhunTestSuite.txt"))) {
         try (BufferedReader br = new BufferedReader(new FileReader("BestTestSuite.txt"))) {
-//        try (BufferedReader br = new BufferedReader(new FileReader("Bug.txt"))) {
             list = br.lines().collect(Collectors.toList());
             ListIterator<String> iterator = list.listIterator(0);
 
@@ -31,18 +33,21 @@ public class RunTestSuite {
                 String events = iterator.next();
                 List<String> eventsList = Stream.of(events.split(",", -1))
                                           .collect(Collectors.toList());
-//                System.out.println("events-"+events.toString());
 
-                ListIterator<String> iterator2 = eventsList.listIterator();
-                while (iterator2.hasNext()) {
-                    String eventName = iterator2.next();
-                    if (! eventName.startsWith("Goal")){
-                        abpTester.abpSimulator( AbpInfra.externalInput.valueOf(eventName.toUpperCase()));
+                try {
+                    ListIterator<String> iterator2 = eventsList.listIterator();
+                    while (iterator2.hasNext()) {
+                        String eventName = iterator2.next();
+                        abpTester.abpSimulator(AbpInfra.externalInput.valueOf(eventName.toUpperCase()));
                     }
+//                abpTester.senderSimulator.setTO_BE_SENT(List.of("A","B","C","D","E","V","K","X"));
+                    System.out.println(ANSI_GREEN+"events-"+events.toString()+ANSI_RESET);
+                } catch (RuntimeException e) {
+                    System.out.println(ANSI_RED+"events-"+events.toString()+ANSI_RESET);
+
                 }
                 abpTester.resetInfra();
-                abpTester.senderSimulator.setTO_BE_SENT(List.of("A","B","C","D","E","V"));
-//                abpTester.senderSimulator.setTO_BE_SENT(List.of("A","B","C","D","E","V","K","X"));
+                abpTester.senderSimulator.setTO_BE_SENT(List.of("A", "B", "C", "D", "E", "V"));
 
             }
         }

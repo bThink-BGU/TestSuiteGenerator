@@ -76,7 +76,8 @@ ctx.bthread('T_success', 'T_SUCCESS', function (entity) {
 //    sync({block: bp.all})
 })
   ctx.bthread('T_fail', 'T_FAIL', function (entity) {
-    sync({request: Event('fail TBS='+entity.TO_BE_SEND.toString()+" Rcv="+entity.received.toString())})
+    // sync({request: Event('fail TBS='+entity.TO_BE_SEND.toString()+" Rcv="+entity.received.toString())})
+    sync({request: Event('fail')})
     bp.log.info("Effect for fail, e={0}", entity);
 
 //  if (use_accepting_states) {
