@@ -28,7 +28,7 @@ public class UsageExample {
     public static void main(String[] args) {
 
         String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
-        new UsageExample("abp.js", 100, BenchmarRanking::rankTestSuiteExtendedKhun).run();
+        new UsageExample("abp.js", 1000, BenchmarRanking::rankTestSuiteOld).run();
     }
 
     public void run() {
@@ -53,11 +53,11 @@ public class UsageExample {
 
         for (var optimizer : optimizers) {
 
-            var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteZero);
+            var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteOld);
 
             reportDuration();
 
-            out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteZero(testSuite));
+            out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteOld(testSuite));
             for (var test : testSuite) {
                 out.println("\t" + test.stream().map(e -> e.name).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
             }
@@ -110,6 +110,8 @@ public class UsageExample {
     static class BenchmarRanking {
         @NotNull
         static final BEvent GOAL = new BEvent("success");
+        static final double[] eithnDMP = {1, 0.9, 0.81, 0.73, 0.66, 0.59, 0.53, 0.48, 0.43, 0.39, 0.35}; // 0.1
+//        static final double[] eithnDMP = {1, 0.9, 0.81, 0.73, 0.66, 0.59, 0.53, 0.48, 0.43, 0.39, 0.35}; // 0.1
 
         static class RankingCriteria {
             public RankingCriteria(boolean reachedGoal) {
@@ -122,11 +124,12 @@ public class UsageExample {
         static public int rankTestSuiteOld(@NotNull Set<List<BEvent>> testSuite) {
             GoalFind goalLogic = new GoalFind();
 
-            testSuite = goalLogic.goalFindSuite(testSuite);
+            testSuite = goalLogic.goalFindSuiteAfter(testSuite);
 
             ArrayList<String> list = new ArrayList<String>();
             Map<String, Integer> hm = new HashMap<String, Integer>();
 
+            list.clear();
             testSuite.stream().forEach(elem -> elem.forEach(subelem -> list.add(subelem.getName()))); //cat-2, fat-3
             hm.clear();
             for (String i : list) {
@@ -135,21 +138,34 @@ public class UsageExample {
                     hm.put(i, (j == null) ? 1 : j + 1);
                 }
             }
-//            int j = 0;
-//            for (Map.Entry<String, Integer> val : hm.entrySet()) {
-//                j += 1;
-//                System.out.println("Element " + j + " -" + val.getKey() + " "
-//                        + "occurs"
-//                        + ": " + val.getValue() + " times");
-//            }
+            double suiteRabk = 0.0;
+            out.println("set-"+hm.toString());
+            for (var entry : hm.entrySet()) {
+                suiteRabk += eithnDMP[entry.getValue()];
+            }
+//            out.println("suiteRank-"+suiteRabk);
 //            out.println("hm-" + hm.size() + " new rank-" + hm.values().stream().filter(x -> x > 8).count());
-            return ((int) hm.values().stream().filter(x -> x > 8).count() * 10 / hm.size());
+//            return ((int) hm.values().stream().filter(x -> x > 8).count() * 10 / hm.size());
+            return ((int) suiteRabk);
 
         }
+        //rankTestSuiteKhun - find all pairs of events
+        static public int rankTestSuiteKhun(@NotNull Set<List<BEvent>> testSuite) {
+            GoalFind goalLogic = new GoalFind();
+            testSuite = goalLogic.goalFindSuiteKuhn(testSuite);
+
+            var s1 = testSuite.stream().flatMap(test -> test.stream().filter(e -> e.name.startsWith("Goal")));
+            var set = s1.collect(Collectors.toSet());
+            out.println("set k- "+set);
+            return set.size();
+        }
+
+
+
         //rankTestSuiteExtendedKhun - find all pairs of events
         static public int rankTestSuiteExtendedKhun(@NotNull Set<List<BEvent>> testSuite) {
             GoalFind goalLogic = new GoalFind();
-            testSuite = goalLogic.goalFindSuite(testSuite);
+            testSuite = goalLogic.goalFindSuiteAfter(testSuite);
 
             var s1 = testSuite.stream().flatMap(test -> {
                 Stream<BEvent> goal = test.stream().filter(e -> e.name.startsWith("Goal"));
@@ -158,18 +174,8 @@ public class UsageExample {
                 return features;
             });
             var set = s1.collect(Collectors.toSet());
-//            out.println(set);
-            return set.size();
-        }
+            out.println("set-"+set.toString());
 
-        //rankTestSuiteKhun - find all pairs of events
-        static public int rankTestSuiteKhun(@NotNull Set<List<BEvent>> testSuite) {
-            GoalFind goalLogic = new GoalFind();
-            testSuite = goalLogic.goalFindSuite(testSuite);
-
-            var s1 = testSuite.stream().flatMap(test -> test.stream().filter(e -> e.name.startsWith("Goal")));
-            var set = s1.collect(Collectors.toSet());
-//            out.println(set);
             return set.size();
         }
 
@@ -180,6 +186,7 @@ public class UsageExample {
             );
             return s1.reduce(Integer::min).get();
         }
+
         static public int rankTestSuiteZero(@NotNull Set<List<BEvent>> testSuite) {
             return 0;
         }

@@ -22,8 +22,8 @@ public class RunTestSuite {
 
         abpTester.senderSimulator.setTO_BE_SENT(List.of("A","B","C","D","E","V"));
 
-//        try (BufferedReader br = new BufferedReader(new FileReader("KhunTestSuite.txt"))) {
-        try (BufferedReader br = new BufferedReader(new FileReader("BestTestSuite.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("KhunTestSuite.txt"))) {
+//        try (BufferedReader br = new BufferedReader(new FileReader("BestTestSuite.txt"))) {
             list = br.lines().collect(Collectors.toList());
             ListIterator<String> iterator = list.listIterator(0);
 
@@ -40,7 +40,6 @@ public class RunTestSuite {
                         String eventName = iterator2.next();
                         abpTester.abpSimulator(AbpInfra.externalInput.valueOf(eventName.toUpperCase()));
                     }
-//                abpTester.senderSimulator.setTO_BE_SENT(List.of("A","B","C","D","E","V","K","X"));
                     System.out.println(ANSI_GREEN+"events-"+events.toString()+ANSI_RESET);
                 } catch (RuntimeException e) {
                     System.out.println(ANSI_RED+"events-"+events.toString()+ANSI_RESET);
