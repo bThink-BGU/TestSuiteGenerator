@@ -7,5 +7,5 @@ import java.util.Set;
 import java.util.function.Function;
 
 public interface OptimizerInterface {
-    Set<List<BEvent>> optimize(Set<List<BEvent>> sample, int SUITE_SIZE, Function<Set<List<BEvent>>, Integer> rankingFunction);
+    Set<List<String>> optimize(Set<List<String>> sample, int SUITE_SIZE, Function<Set<List<String>>, Integer> rankingFunction);
 }

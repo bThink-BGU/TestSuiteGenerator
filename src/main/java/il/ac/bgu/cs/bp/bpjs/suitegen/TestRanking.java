@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.Set;
 
 public interface TestRanking {
-    int rankTestSuite(Set<List<BEvent>> testSuite);
+    int rankTestSuite(Set<List<String>> testSuite);
 }

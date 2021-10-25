@@ -22,7 +22,7 @@ public class BruteForceOptimizer implements OptimizerInterface {
 
 
     public @NotNull
-    Set<List<BEvent>> optimize(Set<List<BEvent>> sample, int SUITE_SIZE, @NotNull Function<Set<List<BEvent>>, Integer> rankingFunction) {
+    Set<List<String>> optimize(Set<List<String>> sample, int SUITE_SIZE, @NotNull Function<Set<List<String>>, Integer> rankingFunction) {
         var list = new ArrayList<>(sample);
 
         System.out.println("list-"+list.size());

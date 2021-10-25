@@ -16,19 +16,18 @@ public class KhunCriterion {
 
 
     public @NotNull
-    Set<List<BEvent>> candidateSuite(Set<List<BEvent>> sample, int SUITE_SIZE, @NotNull Function<Set<List<BEvent>>, Integer> rankingFunction, double rankMax) {
+    Set<List<String>> candidateSuite(Set<List<String>> sample, int SUITE_SIZE, @NotNull Function<Set<List<String>>, Integer> rankingFunction, double rankMax) {
 
         var list = new ArrayList<>(sample);
-        System.out.println("list-"+list.size());
 
         for (int i = 0; i < NUM_OF_ITERATIONS; i++) {
             Collections.shuffle(list);
             var candidateSuite = new HashSet<>(list.subList(0, SUITE_SIZE));
             var candidateRank = rankingFunction.apply(candidateSuite);
 
-            System.out.println("cand-"+candidateRank);
+//            System.out.println("cand-"+candidateRank);
             if (candidateRank > rankMax) {
-                System.out.println("indx-" + i + " candidateRank-" + candidateRank);
+//                System.out.println("indx-" + i + " candidateRank-" + candidateRank);
                 return candidateSuite;
             }
         }

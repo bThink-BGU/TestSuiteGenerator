@@ -29,7 +29,7 @@ public class GeneticOptimizer implements OptimizerInterface {
         this.NUMBER_OF_GENERATIONS = NUMBER_OF_GENERATIONS;
     }
 
-    public Set<List<BEvent>> optimize(Set<List<BEvent>> samples, int suiteSize, Function<Set<List<BEvent>>, Integer> rankingFunction) {
+    public Set<List<String>> optimize(Set<List<String>> samples, int suiteSize, Function<Set<List<String>>, Integer> rankingFunction) {
         final GeneticOptimizerHelper problem = new GeneticOptimizerHelper(ISeq.of(samples), suiteSize, rankingFunction);
 
         var engine = Engine.builder(problem)
@@ -50,25 +50,25 @@ public class GeneticOptimizer implements OptimizerInterface {
     }
 
     static class GeneticOptimizerHelper
-            implements Problem<ISeq<List<BEvent>>, EnumGene<List<BEvent>>, Integer> {
+            implements Problem<ISeq<List<String>>, EnumGene<List<String>>, Integer> {
 
-        private final ISeq<List<BEvent>> universe;
+        private final ISeq<List<String>> universe;
         private final int subsetSize;
-        private final Function<Set<List<BEvent>>, Integer> rankingFunction;
+        private final Function<Set<List<String>>, Integer> rankingFunction;
 
-        public GeneticOptimizerHelper(final ISeq<List<BEvent>> universe, final int subsetSize, Function<Set<List<BEvent>>, Integer> rankingFunction) {
+        public GeneticOptimizerHelper(final ISeq<List<String>> universe, final int subsetSize, Function<Set<List<String>>, Integer> rankingFunction) {
             this.universe = requireNonNull(universe);
             this.subsetSize = subsetSize;
             this.rankingFunction = rankingFunction;
         }
 
         @Override
-        public Function<ISeq<List<BEvent>>, Integer> fitness() {
+        public Function<ISeq<List<String>>, Integer> fitness() {
             return suite -> rankingFunction.apply(new HashSet<>(suite.asList()));
         }
 
         @Override
-        public Codec<ISeq<List<BEvent>>, EnumGene<List<BEvent>>> codec() {
+        public Codec<ISeq<List<String>>, EnumGene<List<String>>> codec() {
             return Codecs.ofSubSet(universe, subsetSize);
         }
     }

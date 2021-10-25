@@ -34,11 +34,9 @@ public class AbpSender {
         return (infra.t2r.size() < infra.getCHN_SIZE() && sendNext < TO_BE_SENT.size());
     }
     public boolean getAckOk(){
-//        return (!infra.r2t.isEmpty() && infra.r2t.peek().getSecNo() == (tSeq+1)%infra.getSEQ_MAX());
         return (!infra.r2t.isEmpty() && infra.r2t.peek().getSecNo() == (tSeq+1)%infra.getSEQ_MAX());
     }
     public boolean getAckNok(){
-//        return (!infra.r2t.isEmpty() && infra.r2t.peek().getSecNo() != (tSeq+1)%infra.getSEQ_MAX());
         return (!infra.r2t.isEmpty() && infra.r2t.peek().getSecNo() != (tSeq+1)%infra.getSEQ_MAX());
     }
     public boolean ifLostT2r(){
@@ -51,9 +49,7 @@ public class AbpSender {
         return Arrays.equals(infra.received.toArray(), TO_BE_SENT.toArray());
     }
 
-    public int gettSeq() {return tSeq; }
     public void settSeq(int tSeq) { this.tSeq = tSeq;  }
-    public int getSendNext() { return sendNext; }
     public void setSendNext(int sendNext) { this.sendNext = sendNext; }
     
     public void runSender(AbpInfra getInfra, AbpInfra.states senderState) {
@@ -148,7 +144,12 @@ public class AbpSender {
     }
     public void receiveAckNok(){
 //        System.out.println("//receiveAckNok");
-        infra.r2t.remove();
+        //        if (infra.prevInput == AbpInfra.externalInput.ACKNOK)
+        int a;
+        if (infra.prevInput == AbpInfra.externalInput.T2RREORDER)
+            a = 0;
+        else
+            infra.r2t.remove();
     }
 
     public void lostT2r(){
