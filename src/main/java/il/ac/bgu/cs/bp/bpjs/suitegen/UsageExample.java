@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.lang.System.out;
@@ -29,7 +30,7 @@ public class UsageExample {
     public static void main(String[] args) {
 
         String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
-        new UsageExample("abp.js", 30000, BenchmarRanking::rankTestSuiteNext).run();
+        new UsageExample("abp.js", 50000, BenchmarRanking::rankTestSuiteNext).run();
     }
 
     public void run() {
@@ -42,56 +43,151 @@ public class UsageExample {
                 programName, SAMPLE_SIZE, 0.5, 0.5);
 //        samples = goalLogic.goalFindSuite(samples);
 
-        reportDuration();
+        out.println(reportDuration());
 
         out.printf("// Computing an optimal test suites%n");
 
         BruteForceOptimizer.Statistics statistics = new BruteForceOptimizer.Statistics();
 
         var optimizers = List.of(
-                new BruteForceOptimizer(1000, statistics),
+                new BruteForceOptimizer(1, statistics),
                 new GeneticOptimizer(0.7, 0.3, 200, 10));
 
-        for (var optimizer : optimizers) {
+        StatisticData sdRnd = new StatisticData();
+        StatisticData sdOur = new StatisticData();
+        for (int i=0; i<100; i++) {
 
-            var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteNext);
+            for (var optimizer : optimizers) {
 
-            reportDuration();
+                var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteNext);
 
-            out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteNext(testSuite));
-            for (var test : testSuite) {
-                out.println("\t" + test.stream().map(e -> e).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
+
+//                out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteNext(testSuite));
+                for (var test : testSuite) {
+//                    out.println("\t" + test.stream().map(e -> e)
+////                            .filter(e -> !e.startsWith("Context"))
+//                            .collect(Collectors.joining(",")));
+
+                    List<String> eventList = test.stream().collect(Collectors.toList());
+
+                    //2-way words
+//                    for (int x = 0; x < eventList.size()-1; x++) {
+//                        if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
+//                        {
+//                            if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
+//                                sdOur.towWayRandom[i] = 1;
+//                            else
+//                                sdOur.towWayOur[i] = 1;
+//                        }
+//                        else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
+//                        {
+//                            if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
+//                                sdRnd.towWayRandom[i] = 1;
+//                            else
+//                                sdRnd.towWayOur[i] = 1;
+//                        }
+                    //3-way words
+                    for (int x = 0; x < eventList.size()-2; x++) {
+                            if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
+                            {
+                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
+                                    sdOur.towWayRandom[i] = 1;
+                                else
+                                    sdOur.towWayOur[i] = 1;
+                            }
+                            else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
+                            {
+                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
+                                    sdRnd.towWayRandom[i] = 1;
+                                else
+                                    sdRnd.towWayOur[i] = 1;
+                            }
+
+                    }
+
+                }
+
+                try {
+                    String fileName = "BestTestSuite_"+optimizer.getClass().getSimpleName()+".txt";
+                    FileWriter writer = new FileWriter(fileName, (i==0 ? false: true));
+
+                    writer.write("// "+reportDuration()+"\r\n");
+
+                    writer.write("// "+optimizer.getClass().getSimpleName()+" generated a suite with rank "+BenchmarRanking.rankTestSuiteNext(testSuite)+", No-"+i+": \r\n");
+                    for (var test : testSuite) {
+                        writer.write(test.stream().map(e -> e)
+//                                .filter(e -> !e.startsWith("Context"))
+                                .collect(Collectors.joining(",")));
+                        writer.write("\r\n"); // write new line
+                    }
+
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            var khunCriterion = new KhunCriterion(1000);
+            var khunTestSuite = khunCriterion.candidateSuite(samples, 10, BenchmarRanking::rankTestSuiteKuhn, 75);
+            for (var test : khunTestSuite) {
+                List<String> eventList = test.stream().collect(Collectors.toList());
+
+                //2-ways
+//                for (int x = 0; x < eventList.size()-1; x++) {
+//                        if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
+//                            sdOur.towWayKuhn[i] = 1;
+//                        else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
+//                            sdRnd.towWayKuhn[i] = 1;
+//                }
+                //3-ways
+                for (int x = 0; x < eventList.size()-2; x++) {
+                    if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
+                        sdOur.towWayKuhn[i] = 1;
+                    else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
+                        sdRnd.towWayKuhn[i] = 1;
+                }
+
             }
 
             try {
-                String fileName = "BestTestSuite.txt";
+                String fileName = "KhunTestSuite.txt";
 
-                FileWriter writer = new FileWriter(fileName, false);
-                for (var test : testSuite) {
-                    writer.write(test.stream().map(e -> e).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
-                    writer.write("\r\n"); // write new line
+                FileWriter writer = new FileWriter(fileName, (i==0 ? false: true));
+
+                writer.write("// "+reportDuration()+"\r\n");
+                writer.write ("// Kuhn's operator generated a suite with rank -"+BenchmarRanking.rankTestSuiteKuhn(khunTestSuite)+", No-"+i+"\r\n");
+                for (var test : khunTestSuite) {
+                    writer.write(test.stream().map(e -> e).collect(Collectors.joining(","))+"\r\n");
                 }
                 writer.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
 
-        var khunCriterion = new KhunCriterion(100);
-        var khunTestSuite = khunCriterion.candidateSuite(samples, 10, BenchmarRanking::rankTestSuiteKuhn, 75);
-        out.printf("// Kuhn's operator generated a suite with rank %d:%n",  BenchmarRanking.rankTestSuiteKuhn(khunTestSuite));
-        for (var test : khunTestSuite) {
-            out.println("\t" + test.stream().map(e -> e).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
+
         }
+        out.println("sdOur.towWayOur-"+Arrays.stream(sdOur.towWayOur).sum());
+        out.println("sdOur.towWayRand-"+Arrays.stream(sdOur.towWayRandom).sum());
+        out.println("sdRnd.towWayOur-"+Arrays.stream(sdRnd.towWayOur).sum());
+        out.println("sdRnd.towWayRandom-"+Arrays.stream(sdRnd.towWayRandom).sum());
+        out.println("sdOur.towWayKuhn-"+Arrays.stream(sdOur.towWayKuhn).sum());
+        out.println("sdRnd.towWayKuhn-"+Arrays.stream(sdRnd.towWayKuhn).sum());
 
         try {
-            String fileName = "KhunTestSuite.txt";
+            String fileName = "BestTestSuite_statisticData.txt";
 
             FileWriter writer = new FileWriter(fileName, false);
-            for (var test : khunTestSuite) {
-                writer.write(test.stream().map(e -> e).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
-                writer.write("\r\n"); // write new line
-            }
+            writer.write("// All data to \"ackOk,ackOk\"-"+sdOur.toString()+"\r\n");
+            writer.write("\r\n"); // write new line
+            writer.write("// All data to \"recNak\"-"+sdRnd.toString()+"\r\n");
+            writer.write("\r\n"); // write new line
+            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayOur-"+Arrays.stream(sdOur.towWayOur).sum()+"\r\n");
+            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayRand-"+Arrays.stream(sdOur.towWayRandom).sum()+"\r\n");
+            writer.write("// Number of \"send,send,ackOk\" towWayOur-"+Arrays.stream(sdRnd.towWayOur).sum()+"\r\n");
+            writer.write("// Number of \"send,send,ackOk\" towWayRandom-"+Arrays.stream(sdRnd.towWayRandom).sum()+"\r\n");
+            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayKuhn-"+Arrays.stream(sdOur.towWayKuhn).sum()+"\r\n");
+            writer.write("// Number of \"send,send,ackOk\" towWayKuhn-"+Arrays.stream(sdRnd.towWayKuhn).sum()+"\r\n");
+
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,10 +201,10 @@ public class UsageExample {
     }
 
 
-    void reportDuration() {
+    String reportDuration() {
         String duration = Duration.between(now, Instant.now()).toString();
-        out.printf("// Duration: %s%n", duration.substring(2));
         now = Instant.now();
+        return ("// Duration: "+duration.substring(2));
     }
 
     static class BenchmarRanking {
@@ -164,8 +260,8 @@ public class UsageExample {
 
         //rankTestSuiteKhun - find all pairs of events
         static public int rankTestSuiteKhun(@NotNull Set<List<String>> testSuite) {
-            GoalFind goalLogic = new GoalFind();
-            testSuite = goalLogic.goalFindSuiteKuhn(testSuite);
+//            GoalFind goalLogic = new GoalFind();
+//            testSuite = goalLogic.goalFindSuiteKuhn(testSuite);
 
             var s1 = testSuite.stream().flatMap(test -> test.stream().filter(e -> e.startsWith("Goal")));
             var set = s1.collect(Collectors.toSet());
@@ -177,8 +273,8 @@ public class UsageExample {
 
         //rankTestSuiteExtendedKhun - find all pairs of events
         static public int rankTestSuiteExtendedKhun(@NotNull Set<List<String>> testSuite) {
-            GoalFind goalLogic = new GoalFind();
-            testSuite = goalLogic.goalFindSuiteAfter(testSuite);
+//            GoalFind goalLogic = new GoalFind();
+//            testSuite = goalLogic.goalFindSuiteAfter(testSuite);
 
             var s1 = testSuite.stream().flatMap(test -> {
                 Stream<String> goal = test.stream().filter(e -> e.startsWith("Goal"));

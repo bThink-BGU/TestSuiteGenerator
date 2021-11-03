@@ -97,13 +97,7 @@ public class AbpReceiver {
 //        System.out.println("//sentAckMsg");
         L3Msg x = infra.t2r.remove();
         String payload = x.getData();
-
-////        if (infra.prevInput == AbpInfra.externalInput.ACKNOK)
-//        if (infra.prevInput == AbpInfra.externalInput.R2TREORDER)
-//            rSeq = rSeq;
-//        else
-            rSeq = (rSeq + 1) % infra.getSEQ_MAX();
-
+        rSeq = (rSeq + 1) % infra.getSEQ_MAX();
         L3Msg t = new L3Msg(rSeq);
         infra.r2t.add(t);
         infra.received.add(payload);

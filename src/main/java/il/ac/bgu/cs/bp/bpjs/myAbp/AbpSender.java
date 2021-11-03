@@ -138,17 +138,17 @@ public class AbpSender {
     public void receivedAckOk(){
 //        System.out.println("//receivedAckOk");
         infra.r2t.remove();
-        tSeq = (tSeq + 1) % infra.getSEQ_MAX();
+
+        if (infra.prevInput == AbpInfra.externalInput.ACKOK)
+            tSeq = tSeq;
+        else
+            tSeq = (tSeq + 1) % infra.getSEQ_MAX();
         sendNext += 1;
 
     }
     public void receiveAckNok(){
 //        System.out.println("//receiveAckNok");
         //        if (infra.prevInput == AbpInfra.externalInput.ACKNOK)
-        int a;
-        if (infra.prevInput == AbpInfra.externalInput.T2RREORDER)
-            a = 0;
-        else
             infra.r2t.remove();
     }
 
