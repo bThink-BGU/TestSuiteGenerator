@@ -1,5 +1,6 @@
 package il.ac.bgu.cs.bp.bpjs.suitegen;
 
+import io.jenetics.internal.collection.Array;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -8,6 +9,10 @@ import java.util.function.Function;
 public class OptimalOptimizer implements OptimizerInterface {
     private final Statistics statistics;
     private final int NUM_OF_ITERATIONS;
+
+
+    static Stack<Integer> stack = new Stack();
+    static List<Object[]> allSuites = new ArrayList<Object[]>();
 
     public OptimalOptimizer(int NUM_OF_ITERATIONS, Statistics statistics) {
         this.NUM_OF_ITERATIONS = NUM_OF_ITERATIONS;
@@ -28,31 +33,49 @@ public class OptimalOptimizer implements OptimizerInterface {
         var bestSuite = new HashSet<List<String>>();
         var bestRank = 0;
 
-        // Optimal operator is searching the highest value of each sublist of 3 test cases suite
-        for (int i = 0; i < list.size(); i++) {
-            for (int j = i + 1; j < list.size(); j++) {
-                for (int k = j + 1; k < list.size(); k++) {
+        loop(0, 0, SUITE_SIZE, sample.size());
+        for (Object[] suiteNum: allSuites ) {
+//            System.out.println("TestSuit - " + list.get((int) suiteNum[0]) + " " + list.get((int) suiteNum[1]));
 
-                    System.out.println("["+i+"]"+"["+j+"]"+"["+k+"]");
-                    var candidateSuite = new HashSet<>(List.of(list.get(i), list.get(j), list.get(k)));
-                    var candidateRank = rankingFunction.apply(candidateSuite);
-
-                    if (candidateRank > bestRank) {
-                        bestSuite = candidateSuite;
-                        bestRank = candidateRank;
-                    }
-
-                    if (statistics != null)
-                        statistics.average += candidateRank;
-
-                }
+            var candidateSuite = new HashSet<List<String>>();
+            // Optimal operator is searching the highest value of each sublist of 3 test cases suite
+            for (Object i: suiteNum) {
+//                            System.out.println("[" + i + "] "+list.get((int) i));
+                candidateSuite.add(list.get((int) i));
             }
+
+            var candidateRank = rankingFunction.apply(candidateSuite);
+
+            if (candidateRank > bestRank) {
+                bestSuite = candidateSuite;
+                bestRank = candidateRank;
+            }
+
+
+            if (statistics != null)
+                statistics.average += candidateRank;
         }
 
         if (statistics != null)
             statistics.average /= NUM_OF_ITERATIONS;
 
         return bestSuite;
+    }
+
+    private static void loop(int start, int level, int max_level, int size) {
+
+        if (level >= max_level) {
+            allSuites.add((stack.toArray()));
+//            System.out.println("in return-"+ allSuites.toString());
+            return;
+        }
+
+        for (int i = start; i < size; i++) {
+            stack.push(i);
+            loop(i+1, level + 1, max_level, size);
+            stack.pop();
+
+        }
     }
 
     static class Statistics {

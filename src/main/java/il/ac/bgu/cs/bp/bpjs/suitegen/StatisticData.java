@@ -8,6 +8,7 @@ public class StatisticData {
     int[] towWayKuhn = new int[1000];
     int[] towWayOur = new int[1000];
     int[] towWayRandom = new int[1000];
+    int[] towWayOptimal = new int[1000];
     int[] threeWayKuhn = new int[1000];
     int[] threeWayOur = new int[1000];
     int[] threeWayRandom = new int[1000];

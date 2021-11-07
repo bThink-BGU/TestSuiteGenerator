@@ -51,17 +51,17 @@ public class UsageExample {
         BruteForceOptimizer.Statistics statistics = new BruteForceOptimizer.Statistics();
 
         var optimizers = List.of(
-                new OptimalOptimizer(3, statistics1),
-//                new BruteForceOptimizer(1, statistics),
+                new OptimalOptimizer(1, statistics1),
+                new BruteForceOptimizer(1, statistics),
                 new GeneticOptimizer(0.7, 0.3, 300, 10));
 
-        StatisticData sdRnd = new StatisticData();
-        StatisticData sdOur = new StatisticData();
-        for (int i=0; i<10; i++) {
+        StatisticData sdOften = new StatisticData();
+        StatisticData sdRare = new StatisticData();
+        for (int i=0; i<1; i++) {
 
             for (var optimizer : optimizers) {
 
-                var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteNext);
+                var testSuite = optimizer.optimize(samples, 5, BenchmarRanking::rankTestSuiteNext);
 
 
 //                out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteNext(testSuite));
@@ -77,33 +77,41 @@ public class UsageExample {
                         if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
                         {
                             if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
-                                sdOur.towWayRandom[i] = 1;
+                                sdRare.towWayOptimal[i] = 1;
+                            else if (optimizer.getClass().getSimpleName().equals("GeneticOptimizer"))
+                                sdRare.towWayOur[i] = 1;
                             else
-                                sdOur.towWayOur[i] = 1;
+                                sdRare.towWayRandom[i] = 1;
                         }
                         else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
                         {
                             if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
-                                sdRnd.towWayRandom[i] = 1;
+                                sdOften.towWayOptimal[i] = 1;
+                            else if (optimizer.getClass().getSimpleName().equals("GeneticOptimizer"))
+                                sdOften.towWayOur[i] = 1;
                             else
-                                sdRnd.towWayOur[i] = 1;
+                                sdOften.towWayRandom[i] = 1;
                         }
                     }
                     //3-way words
 //                    for (int x = 0; x < eventList.size()-2; x++) {
 //                            if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
 //                            {
-//                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
-//                                    sdOur.towWayRandom[i] = 1;
+//                                if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
+//                                    sdRare.towWayOptimal[i] = 1;
+//                                else if (optimizer.getClass().getSimpleName().equals("GeneticOptimizer"))
+//                                    sdRare.towWayOur[i] = 1;
 //                                else
-//                                    sdOur.towWayOur[i] = 1;
+//                                    sdRare.towWayRandom[i] = 1;
 //                            }
 //                            else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
 //                            {
-//                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
-//                                    sdRnd.towWayRandom[i] = 1;
+//                                if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
+//                                    sdOften.towWayOptimal[i] = 1;
+//                                else if (optimizer.getClass().getSimpleName().equals("GeneticOptimizer"))
+//                                    sdOften.towWayOur[i] = 1;
 //                                else
-//                                    sdRnd.towWayOur[i] = 1;
+//                                    sdOften.towWayRandom[i] = 1;
 //                            }
 //
 //                    }
@@ -138,16 +146,16 @@ public class UsageExample {
                 //2-ways
                 for (int x = 0; x < eventList.size()-1; x++) {
                         if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
-                            sdOur.towWayKuhn[i] = 1;
+                            sdRare.towWayKuhn[i] = 1;
                         else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
-                            sdRnd.towWayKuhn[i] = 1;
+                            sdOften.towWayKuhn[i] = 1;
                 }
                 //3-ways
 //                for (int x = 0; x < eventList.size()-2; x++) {
 //                    if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
-//                        sdOur.towWayKuhn[i] = 1;
+//                        sdRare.towWayKuhn[i] = 1;
 //                    else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
-//                        sdRnd.towWayKuhn[i] = 1;
+//                        sdOften.towWayKuhn[i] = 1;
 //                }
 
             }
@@ -169,27 +177,31 @@ public class UsageExample {
 
 
         }
-        out.println("sdOur.towWayOur-"+Arrays.stream(sdOur.towWayOur).sum());
-        out.println("sdOur.towWayRand-"+Arrays.stream(sdOur.towWayRandom).sum());
-        out.println("sdRnd.towWayOur-"+Arrays.stream(sdRnd.towWayOur).sum());
-        out.println("sdRnd.towWayRandom-"+Arrays.stream(sdRnd.towWayRandom).sum());
-        out.println("sdOur.towWayKuhn-"+Arrays.stream(sdOur.towWayKuhn).sum());
-        out.println("sdRnd.towWayKuhn-"+Arrays.stream(sdRnd.towWayKuhn).sum());
+        out.println("sdRare.towWayOur-"+Arrays.stream(sdRare.towWayOur).sum());
+        out.println("sdRare.towWayRand-"+Arrays.stream(sdRare.towWayRandom).sum());
+        out.println("sdOften.towWayOur-"+Arrays.stream(sdOften.towWayOur).sum());
+        out.println("sdOften.towWayRandom-"+Arrays.stream(sdOften.towWayRandom).sum());
+        out.println("sdRare.towWayKuhn-"+Arrays.stream(sdRare.towWayKuhn).sum());
+        out.println("sdOften.towWayKuhn-"+Arrays.stream(sdOften.towWayKuhn).sum());
+        out.println("sdRare.towWayOptimal-"+Arrays.stream(sdRare.towWayOptimal).sum());
+        out.println("sdOften.towWayOptimal-"+Arrays.stream(sdOften.towWayOptimal).sum());
 
         try {
             String fileName = "BestTestSuite_statisticData.txt";
 
             FileWriter writer = new FileWriter(fileName, false);
-            writer.write("// All data to \"ackOk,ackOk\"-"+sdOur.toString()+"\r\n");
+            writer.write("// All data to \"ackOk,ackOk\"-"+sdRare.toString()+"\r\n");
             writer.write("\r\n"); // write new line
-            writer.write("// All data to \"recNak\"-"+sdRnd.toString()+"\r\n");
+            writer.write("// All data to \"recNak\"-"+sdOften.toString()+"\r\n");
             writer.write("\r\n"); // write new line
-            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayOur-"+Arrays.stream(sdOur.towWayOur).sum()+"\r\n");
-            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayRand-"+Arrays.stream(sdOur.towWayRandom).sum()+"\r\n");
-            writer.write("// Number of \"send,send,ackOk\" towWayOur-"+Arrays.stream(sdRnd.towWayOur).sum()+"\r\n");
-            writer.write("// Number of \"send,send,ackOk\" towWayRandom-"+Arrays.stream(sdRnd.towWayRandom).sum()+"\r\n");
-            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayKuhn-"+Arrays.stream(sdOur.towWayKuhn).sum()+"\r\n");
-            writer.write("// Number of \"send,send,ackOk\" towWayKuhn-"+Arrays.stream(sdRnd.towWayKuhn).sum()+"\r\n");
+            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayOur-"+Arrays.stream(sdRare.towWayOur).sum()+"\r\n");
+            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayRand-"+Arrays.stream(sdRare.towWayRandom).sum()+"\r\n");
+            writer.write("// Number of \"send,send,ackOk\" towWayOur-"+Arrays.stream(sdOften.towWayOur).sum()+"\r\n");
+            writer.write("// Number of \"send,send,ackOk\" towWayRandom-"+Arrays.stream(sdOften.towWayRandom).sum()+"\r\n");
+            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayKuhn-"+Arrays.stream(sdRare.towWayKuhn).sum()+"\r\n");
+            writer.write("// Number of \"send,send,ackOk\" towWayKuhn-"+Arrays.stream(sdOften.towWayKuhn).sum()+"\r\n");
+            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayOptimal-"+Arrays.stream(sdRare.towWayOptimal).sum()+"\r\n");
+            writer.write("// Number of \"send,send,ackOk\" towWayOptimal-"+Arrays.stream(sdOften.towWayOptimal).sum()+"\r\n");
 
             writer.close();
         } catch (IOException e) {
