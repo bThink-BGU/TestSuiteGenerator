@@ -30,7 +30,7 @@ public class UsageExample {
     public static void main(String[] args) {
 
         String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
-        new UsageExample("abp.js", 50000, BenchmarRanking::rankTestSuiteNext).run();
+        new UsageExample("abp.js", 100, BenchmarRanking::rankTestSuiteNext).run();
     }
 
     public void run() {
@@ -47,15 +47,17 @@ public class UsageExample {
 
         out.printf("// Computing an optimal test suites%n");
 
+        OptimalOptimizer.Statistics statistics1 = new OptimalOptimizer.Statistics();
         BruteForceOptimizer.Statistics statistics = new BruteForceOptimizer.Statistics();
 
         var optimizers = List.of(
-                new BruteForceOptimizer(1, statistics),
-                new GeneticOptimizer(0.7, 0.3, 200, 10));
+                new OptimalOptimizer(3, statistics1),
+//                new BruteForceOptimizer(1, statistics),
+                new GeneticOptimizer(0.7, 0.3, 300, 10));
 
         StatisticData sdRnd = new StatisticData();
         StatisticData sdOur = new StatisticData();
-        for (int i=0; i<100; i++) {
+        for (int i=0; i<10; i++) {
 
             for (var optimizer : optimizers) {
 
@@ -71,39 +73,40 @@ public class UsageExample {
                     List<String> eventList = test.stream().collect(Collectors.toList());
 
                     //2-way words
-//                    for (int x = 0; x < eventList.size()-1; x++) {
-//                        if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
-//                        {
-//                            if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
-//                                sdOur.towWayRandom[i] = 1;
-//                            else
-//                                sdOur.towWayOur[i] = 1;
-//                        }
-//                        else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
-//                        {
-//                            if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
-//                                sdRnd.towWayRandom[i] = 1;
-//                            else
-//                                sdRnd.towWayOur[i] = 1;
-//                        }
-                    //3-way words
-                    for (int x = 0; x < eventList.size()-2; x++) {
-                            if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
-                            {
-                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
-                                    sdOur.towWayRandom[i] = 1;
-                                else
-                                    sdOur.towWayOur[i] = 1;
-                            }
-                            else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
-                            {
-                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
-                                    sdRnd.towWayRandom[i] = 1;
-                                else
-                                    sdRnd.towWayOur[i] = 1;
-                            }
-
+                    for (int x = 0; x < eventList.size()-1; x++) {
+                        if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
+                        {
+                            if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
+                                sdOur.towWayRandom[i] = 1;
+                            else
+                                sdOur.towWayOur[i] = 1;
+                        }
+                        else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
+                        {
+                            if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
+                                sdRnd.towWayRandom[i] = 1;
+                            else
+                                sdRnd.towWayOur[i] = 1;
+                        }
                     }
+                    //3-way words
+//                    for (int x = 0; x < eventList.size()-2; x++) {
+//                            if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
+//                            {
+//                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
+//                                    sdOur.towWayRandom[i] = 1;
+//                                else
+//                                    sdOur.towWayOur[i] = 1;
+//                            }
+//                            else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
+//                            {
+//                                if (optimizer.getClass().getSimpleName().equals("BruteForceOptimizer"))
+//                                    sdRnd.towWayRandom[i] = 1;
+//                                else
+//                                    sdRnd.towWayOur[i] = 1;
+//                            }
+//
+//                    }
 
                 }
 
@@ -133,19 +136,19 @@ public class UsageExample {
                 List<String> eventList = test.stream().collect(Collectors.toList());
 
                 //2-ways
-//                for (int x = 0; x < eventList.size()-1; x++) {
-//                        if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
-//                            sdOur.towWayKuhn[i] = 1;
-//                        else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
-//                            sdRnd.towWayKuhn[i] = 1;
-//                }
-                //3-ways
-                for (int x = 0; x < eventList.size()-2; x++) {
-                    if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
-                        sdOur.towWayKuhn[i] = 1;
-                    else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
-                        sdRnd.towWayKuhn[i] = 1;
+                for (int x = 0; x < eventList.size()-1; x++) {
+                        if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
+                            sdOur.towWayKuhn[i] = 1;
+                        else if ((eventList.get(x) + "," + eventList.get(x+1)).equals("recNak,recAck"))
+                            sdRnd.towWayKuhn[i] = 1;
                 }
+                //3-ways
+//                for (int x = 0; x < eventList.size()-2; x++) {
+//                    if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
+//                        sdOur.towWayKuhn[i] = 1;
+//                    else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
+//                        sdRnd.towWayKuhn[i] = 1;
+//                }
 
             }
 
