@@ -98,20 +98,20 @@ public class UsageExample {
 //                            if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("ackNok,ackNok,recAck"))
 //                            {
 //                                if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
-//                                    sdRare.towWayOptimal[i] = 1;
+//                                    sdRare.threeWayOptimal[i] = 1;
 //                                else if (optimizer.getClass().getSimpleName().equals("GeneticOptimizer"))
-//                                    sdRare.towWayOur[i] = 1;
+//                                    sdRare.threeWayOur[i] = 1;
 //                                else
-//                                    sdRare.towWayRandom[i] = 1;
+//                                    sdRare.threeWayRandom[i] = 1;
 //                            }
 //                            else if ((eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)).equals("send,send,ackOk"))
 //                            {
 //                                if (optimizer.getClass().getSimpleName().equals("OptimalOptimizer"))
-//                                    sdOften.towWayOptimal[i] = 1;
+//                                    sdOften.threeWayOptimal[i] = 1;
 //                                else if (optimizer.getClass().getSimpleName().equals("GeneticOptimizer"))
-//                                    sdOften.towWayOur[i] = 1;
+//                                    sdOften.threeWayOur[i] = 1;
 //                                else
-//                                    sdOften.towWayRandom[i] = 1;
+//                                    sdOften.threeWayRandom[i] = 1;
 //                            }
 //
 //                    }
