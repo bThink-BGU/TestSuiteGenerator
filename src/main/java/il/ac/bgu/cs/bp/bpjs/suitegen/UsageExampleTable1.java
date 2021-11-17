@@ -67,7 +67,7 @@ public class UsageExampleTable1 {
                 for (var test : testSuite) {
                     List<String> eventList = test.stream().collect(Collectors.toList());
 
-                    //2-way words
+//                    2-way words
                     for (int x = 0; x < eventList.size()-1; x++) {
                         if ((eventList.get(x) + "," + eventList.get(x+1)).equals("ackOk,ackOk"))
                         {
@@ -134,7 +134,7 @@ public class UsageExampleTable1 {
             }
 
             var khunCriterion = new KhunCriterion(1000);
-            var khunTestSuite = khunCriterion.candidateSuite(samples, 10, BenchmarRanking::rankTestSuiteKuhn, 75);
+            var khunTestSuite = khunCriterion.genSuite(samples, 10, BenchmarRanking::rankTestSuiteKuhn, 75);
             for (var test : khunTestSuite) {
                 List<String> eventList = test.stream().collect(Collectors.toList());
 
@@ -172,6 +172,7 @@ public class UsageExampleTable1 {
 
 
         }
+        //2-ways
         out.println("sdRare.towWayOur-"+Arrays.stream(sdRare.towWayOur).sum());
         out.println("sdRare.towWayRand-"+Arrays.stream(sdRare.towWayRandom).sum());
         out.println("sdOften.towWayOur-"+Arrays.stream(sdOften.towWayOur).sum());
@@ -181,7 +182,18 @@ public class UsageExampleTable1 {
         out.println("sdRare.towWayOptimal-"+Arrays.stream(sdRare.towWayOptimal).sum());
         out.println("sdOften.towWayOptimal-"+Arrays.stream(sdOften.towWayOptimal).sum());
 
+        //3-ways
+//        out.println("sdRare.threeWayOur-"+Arrays.stream(sdRare.threeWayOur).sum());
+//        out.println("sdRare.threeWayRand-"+Arrays.stream(sdRare.threeWayRandom).sum());
+//        out.println("sdOften.threeWayOur-"+Arrays.stream(sdOften.threeWayOur).sum());
+//        out.println("sdOften.threeWayRandom-"+Arrays.stream(sdOften.threeWayRandom).sum());
+//        out.println("sdRare.threeWayKuhn-"+Arrays.stream(sdRare.threeWayKuhn).sum());
+//        out.println("sdOften.threeWayKuhn-"+Arrays.stream(sdOften.threeWayKuhn).sum());
+//        out.println("sdRare.threeWayOptimal-"+Arrays.stream(sdRare.threeWayOptimal).sum());
+//        out.println("sdOften.threeWayOptimal-"+Arrays.stream(sdOften.threeWayOptimal).sum());
+
         try {
+            //2-ways
             String fileName = "BestTestSuite_statisticData_t1.txt";
 
             FileWriter writer = new FileWriter(fileName, false);
@@ -189,14 +201,31 @@ public class UsageExampleTable1 {
             writer.write("\r\n"); // write new line
             writer.write("// All data to \"recNak,recAck\"-"+sdOften.toString()+"\r\n");
             writer.write("\r\n"); // write new line
-            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayOur-"+Arrays.stream(sdRare.towWayOur).sum()+"\r\n");
-            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayRand-"+Arrays.stream(sdRare.towWayRandom).sum()+"\r\n");
-            writer.write("// Number of \"send,send,ackOk\" towWayOur-"+Arrays.stream(sdOften.towWayOur).sum()+"\r\n");
-            writer.write("// Number of \"send,send,ackOk\" towWayRandom-"+Arrays.stream(sdOften.towWayRandom).sum()+"\r\n");
-            writer.write("// Number of \"ackNok,ackNok,recAck\" towWayKuhn-"+Arrays.stream(sdRare.towWayKuhn).sum()+"\r\n");
-            writer.write("// Number of \"send,send,ackOk\" towWayKuhn-"+Arrays.stream(sdOften.towWayKuhn).sum()+"\r\n");
+            writer.write("// Number of \"ackOk,ackOk\" towWayOur-"+Arrays.stream(sdRare.towWayOur).sum()+"\r\n");
+            writer.write("// Number of \"ackOk,ackOk\" towWayRand-"+Arrays.stream(sdRare.towWayRandom).sum()+"\r\n");
+            writer.write("// Number of \"recNak,recAck\" towWayOur-"+Arrays.stream(sdOften.towWayOur).sum()+"\r\n");
+            writer.write("// Number of \"recNak,recAck\" towWayRandom-"+Arrays.stream(sdOften.towWayRandom).sum()+"\r\n");
+            writer.write("// Number of \"ackOk,ackOk\" towWayKuhn-"+Arrays.stream(sdRare.towWayKuhn).sum()+"\r\n");
+            writer.write("// Number of \"recNak,recAck\" towWayKuhn-"+Arrays.stream(sdOften.towWayKuhn).sum()+"\r\n");
             // writer.write("// Number of \"ackNok,ackNok,recAck\" towWayOptimal-"+Arrays.stream(sdRare.towWayOptimal).sum()+"\r\n");
             // writer.write("// Number of \"send,send,ackOk\" towWayOptimal-"+Arrays.stream(sdOften.towWayOptimal).sum()+"\r\n");
+
+            //3-ways
+//            String fileName = "BestTestSuite_statisticData_t1_3.txt";
+//
+//            FileWriter writer = new FileWriter(fileName, false);
+//            writer.write("// All data to \"ackNok,ackNok,recAck\"-"+sdRare.toString()+"\r\n");
+//            writer.write("\r\n"); // write new line
+//            writer.write("// All data to \"send,send,ackOk\"-"+sdOften.toString()+"\r\n");
+//            writer.write("\r\n"); // write new line
+//            writer.write("// Number of \"ackNok,ackNok,recAck\" threeWayOur-"+Arrays.stream(sdRare.threeWayOur).sum()+"\r\n");
+//            writer.write("// Number of \"ackNok,ackNok,recAck\" threeWayRand-"+Arrays.stream(sdRare.threeWayRandom).sum()+"\r\n");
+//            writer.write("// Number of \"send,send,ackOk\" threeWayOur-"+Arrays.stream(sdOften.threeWayOur).sum()+"\r\n");
+//            writer.write("// Number of \"send,send,ackOk\" threeWayRandom-"+Arrays.stream(sdOften.threeWayRandom).sum()+"\r\n");
+//            writer.write("// Number of \"ackNok,ackNok,recAck\" threeWayKuhn-"+Arrays.stream(sdRare.threeWayKuhn).sum()+"\r\n");
+//            writer.write("// Number of \"send,send,ackOk\" threeWayKuhn-"+Arrays.stream(sdOften.threeWayKuhn).sum()+"\r\n");
+//            // writer.write("// Number of \"ackNok,ackNok,recAck\" towWayOptimal-"+Arrays.stream(sdRare.towWayOptimal).sum()+"\r\n");
+//            // writer.write("// Number of \"send,send,ackOk\" towWayOptimal-"+Arrays.stream(sdOften.towWayOptimal).sum()+"\r\n");
 
             writer.close();
         } catch (IOException e) {
@@ -237,10 +266,14 @@ public class UsageExampleTable1 {
 
             for (var test : testSuite) {
                 List<String> eventList = test.stream().collect(Collectors.toList());
-
+                //2-ways
                 for (int x = 0; x < eventList.size()-1; x++) {
-                    newTestSuite.add(("(" + eventList.get(x) + "," + eventList.get(x+1))+")");
+                    newTestSuite.add("(" + eventList.get(x) + "," + eventList.get(x+1)+")");
                 }
+                //3-ways
+//                for (int x = 0; x < eventList.size()-2; x++) {
+//                    newTestSuite.add("(" + eventList.get(x) + "," + eventList.get(x+1)+ "," + eventList.get(x+2)+")");
+//                }
 
             }
             Map<String, Long> hm = newTestSuite.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
@@ -258,7 +291,12 @@ public class UsageExampleTable1 {
 
                 for (int x=0; x<eventList.size(); x++) {
                     for (int y=0; y<eventList.size(); y++) {
-                        newTestSuite.add( ("(" + eventList.get(x) + "," + eventList.get(y))+")");
+                        //3-ways
+//                        for (int k=0; k<eventList.size(); k++ )
+                            //2-ways
+                            newTestSuite.add("(" + eventList.get(x) + "," + eventList.get(y)+ ")");
+                            //3-ways
+//                            newTestSuite.add("(" + eventList.get(x) + "," + eventList.get(y) + "," + eventList.get(k) + ")");
                     }
                 }
             }

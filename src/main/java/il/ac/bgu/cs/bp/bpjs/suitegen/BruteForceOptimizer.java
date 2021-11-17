@@ -26,6 +26,7 @@ public class BruteForceOptimizer implements OptimizerInterface {
         var list = new ArrayList<>(sample);
 
 //        System.out.println("list-"+list.size());
+        Collections.shuffle(list);
         var bestSuite = new HashSet<>(list.subList(0, SUITE_SIZE));
         var bestRank = rankingFunction.apply(bestSuite);
 

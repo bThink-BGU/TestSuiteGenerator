@@ -16,13 +16,15 @@ public class KhunCriterion {
 
 
     public @NotNull
-    Set<List<String>> candidateSuite(Set<List<String>> sample, int SUITE_SIZE, @NotNull Function<Set<List<String>>, Integer> rankingFunction, double rankMax) {
+    Set<List<String>> genSuite(Set<List<String>> sample, int SUITE_SIZE, @NotNull Function<Set<List<String>>, Integer> rankingFunction, double rankMax) {
 
         var list = new ArrayList<>(sample);
+        Collections.shuffle(list);
+        var candidateSuite = new HashSet<>(list.subList(0, SUITE_SIZE));
 
         for (int i = 0; i < NUM_OF_ITERATIONS; i++) {
             Collections.shuffle(list);
-            var candidateSuite = new HashSet<>(list.subList(0, SUITE_SIZE));
+            candidateSuite = new HashSet<>(list.subList(0, SUITE_SIZE));
             var candidateRank = rankingFunction.apply(candidateSuite);
 
 //            System.out.println("cand-"+candidateRank);
@@ -31,7 +33,7 @@ public class KhunCriterion {
                 return candidateSuite;
             }
         }
-        return null;
+        return  candidateSuite;
     }
 
 

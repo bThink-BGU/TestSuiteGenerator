@@ -139,7 +139,7 @@ public class UsageExample {
             }
 
             var khunCriterion = new KhunCriterion(1000);
-            var khunTestSuite = khunCriterion.candidateSuite(samples, 10, BenchmarRanking::rankTestSuiteKuhn, 75);
+            var khunTestSuite = khunCriterion.genSuite(samples, 10, BenchmarRanking::rankTestSuiteKuhn, 75);
             for (var test : khunTestSuite) {
                 List<String> eventList = test.stream().collect(Collectors.toList());
 

@@ -35,7 +35,8 @@ public class OptimalOptimizer implements OptimizerInterface {
 
         loop(0, 0, SUITE_SIZE, sample.size());
         for (Object[] suiteNum: allSuites ) {
-//            System.out.println("TestSuit - " + list.get((int) suiteNum[0]) + " " + list.get((int) suiteNum[1]));
+//            System.out.println("TestSuit - " + (int) suiteNum[0] + " " + (int) suiteNum[1] +" "+(int) suiteNum[2] + " " + (int) suiteNum[3] + " " + (int) suiteNum[4]);
+//            System.out.print(".");
 
             var candidateSuite = new HashSet<List<String>>();
             // Optimal operator is searching the highest value of each sublist of 3 test cases suite
@@ -65,8 +66,8 @@ public class OptimalOptimizer implements OptimizerInterface {
     private static void loop(int start, int level, int max_level, int size) {
 
         if (level >= max_level) {
+//            System.out.println("in return-"+ stack.toString());
             allSuites.add((stack.toArray()));
-//            System.out.println("in return-"+ allSuites.toString());
             return;
         }
 
