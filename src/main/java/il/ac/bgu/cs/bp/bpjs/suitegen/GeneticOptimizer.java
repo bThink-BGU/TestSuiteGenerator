@@ -41,7 +41,9 @@ public class GeneticOptimizer implements OptimizerInterface {
                 .build();
 
         var result = engine.stream()
-                .limit(Limits.bySteadyFitness(NUMBER_OF_GENERATIONS))
+                .limit(Limits.byFitnessConvergence(10, 30,0.0004))
+                .limit(NUMBER_OF_GENERATIONS)
+//                .limit(Limits.bySteadyFitness(NUMBER_OF_GENERATIONS))
                 .collect(EvolutionResult.toBestPhenotype());
 
         return result.genotype().chromosome().stream()

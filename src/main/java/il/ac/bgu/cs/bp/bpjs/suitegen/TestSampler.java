@@ -22,41 +22,41 @@ public class TestSampler {
         Set<List<String>> samples = new HashSet<>();
         Set<List<BEvent>> origSamples = new HashSet<>();
 
-        int not_growing_counter = 0;
-        int previous_size = 0;
-
-        while (origSamples.size() < SAMPLE_SIZE && not_growing_counter < 10) {
-//            ResourceBProgram program = new ResourceBProgram(bprogramname);
-            BProgram program = new ContextBProgram(bprogramname);
-
-            program.setEventSelectionStrategy(new GoalDrivenEventSelectionStrategy(WISH_PROBABILITY, OBJECT_PROBABILITY));
-
-            var runner = new BProgramRunner(program);
-            var eventLogger = runner.addListener(new InMemoryEventLoggingListener());
-            runner.run();
-            origSamples.add(eventLogger.getEvents());
-
-            if (origSamples.size() == previous_size)
-                not_growing_counter++;
-            else
-                not_growing_counter = 0;
-
-            previous_size = origSamples.size();
-
-        }
-        try {
-            String fileName = "SampledCases.txt";
-
-            FileWriter writer = new FileWriter(fileName, false);
-            for (var test : origSamples) {
-                writer.write(test.stream().map(e -> e.name).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
-                writer.write("\r\n"); // write new line
-            }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+//        int not_growing_counter = 0;
+//        int previous_size = 0;
+//
+//        while (origSamples.size() < SAMPLE_SIZE && not_growing_counter < 10) {
+////            ResourceBProgram program = new ResourceBProgram(bprogramname);
+//            BProgram program = new ContextBProgram(bprogramname);
+//
+//            program.setEventSelectionStrategy(new GoalDrivenEventSelectionStrategy(WISH_PROBABILITY, OBJECT_PROBABILITY));
+//
+//            var runner = new BProgramRunner(program);
+//            var eventLogger = runner.addListener(new InMemoryEventLoggingListener());
+//            runner.run();
+//            origSamples.add(eventLogger.getEvents());
+//
+//            if (origSamples.size() == previous_size)
+//                not_growing_counter++;
+//            else
+//                not_growing_counter = 0;
+//
+//            previous_size = origSamples.size();
+//
+//        }
+//        try {
+//            String fileName = "SampledCases.txt";
+//
+//            FileWriter writer = new FileWriter(fileName, false);
+//            for (var test : origSamples) {
+//                writer.write(test.stream().map(e -> e.name).filter(e -> !e.startsWith("Context")).collect(Collectors.joining(",")));
+//                writer.write("\r\n"); // write new line
+//            }
+//            writer.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
 //                                                  |
 //        ------------------  generate sampled data | OR read generated sampled data from file | ----------------
 //                                                                                             |

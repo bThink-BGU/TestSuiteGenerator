@@ -1,6 +1,5 @@
 package il.ac.bgu.cs.bp.bpjs.suitegen;
 
-import il.ac.bgu.cs.bp.bpjs.model.BEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileWriter;
@@ -11,8 +10,6 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static java.lang.System.out;
 
@@ -26,12 +23,18 @@ public class UsageExampleTable2 {
         this.programName = programName;
         this.SAMPLE_SIZE = SAMPLE_SIZE;
     }
+    private final int SUITE_SIZE = 5;
+//    private final int SUITE_SIZE = 10;
+//    private final int SUITE_SIZE = 20;
+
+    static Function<Set<List<String>>, Integer> rankingFunction  = UsageExampleTable1_3way.BenchmarRanking::rankTestSuiteNext;
+//    Function<Set<List<String>>, Integer> rankingFunction  = BenchmarRanking::rankTestSuiteKuhn;
+
 
     public static void main(String[] args) {
 
         String program = "\"abp/dal.js\",\"abp/bl.js\",\"abp/Tester.js\",\"abp/kohn.js\"";
-//        new UsageExampleTable2("abp.js", 100, BenchmarRanking::rankTestSuiteNext).run();   //Next
-        new UsageExampleTable2("abp.js", 100, BenchmarRanking::rankTestSuiteKuhn).run(); //Kuhn
+        new UsageExampleTable2("abp.js", 100, rankingFunction).run(); //Kuhn
     }
 
     public void run() {
@@ -55,7 +58,7 @@ public class UsageExampleTable2 {
                 new OptimalOptimizer(1, statistics1),
                 new BruteForceOptimizer(1, statistics),
 //                new BruteForceOptimizer(10000, statistics),
-                new GeneticOptimizer(0.7, 0.3, 300, 10));
+                new GeneticOptimizer(0.7, 0.05, 300, 5));
 
         StatisticData sdOften = new StatisticData();
         StatisticData sdRare = new StatisticData();
@@ -63,18 +66,11 @@ public class UsageExampleTable2 {
 
             for (var optimizer : optimizers) {
 
-//                var testSuite = optimizer.optimize(samples, 5, BenchmarRanking::rankTestSuiteNext);
-//                 var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteNext);   // without optimal
-                 var testSuite = optimizer.optimize(samples, 5, BenchmarRanking::rankTestSuiteKuhn);
-//                 var testSuite = optimizer.optimize(samples, 10, BenchmarRanking::rankTestSuiteKuhn);   // without optimal
+                 var testSuite = optimizer.optimize(samples, SUITE_SIZE, BenchmarRanking::rankTestSuiteKuhn);
                 saveNo += 1;
                 saveNo %= 3;
 
-//                out.printf("// %s generated a suite with rank %d:%n", optimizer.getClass().getSimpleName(), BenchmarRanking.rankTestSuiteNext(testSuite));
                 for (var test : testSuite) {
-//                    out.println("\t" + test.stream().map(e -> e)
-////                            .filter(e -> !e.startsWith("Context"))
-//                            .collect(Collectors.joining(",")));
 
                     List<String> eventList = test.stream().collect(Collectors.toList());
 
@@ -108,8 +104,7 @@ public class UsageExampleTable2 {
 
                     writer.write("// "+reportDuration()+"\r\n");
 
-//                    writer.write("// "+optimizer.getClass().getSimpleName()+" generated a suite with rank "+BenchmarRanking.rankTestSuiteNext(testSuite)+", No-"+i+": \r\n");
-                    writer.write("// "+optimizer.getClass().getSimpleName()+" generated a suite with rank "+BenchmarRanking.rankTestSuiteKuhn(testSuite)+", No-"+i+": \r\n");
+                    writer.write("// "+optimizer.getClass().getSimpleName()+" generated a suite with rank "+rankingFunction.apply(testSuite)+", No-"+i+": \r\n");
                     for (var test : testSuite) {
                         writer.write(test.stream().map(e -> e)
 //                                .filter(e -> !e.startsWith("Context"))
@@ -124,10 +119,7 @@ public class UsageExampleTable2 {
             }
 
             var khunCriterion = new KhunCriterion(1);
-            var khunTestSuite = khunCriterion.genSuite(samples, 5, BenchmarRanking::rankTestSuiteKuhn, 55);
-            // var khunTestSuite = khunCriterion.genSuite(samples, 5, BenchmarRanking::rankTestSuiteNext, 65);
-            // var khunTestSuite = khunCriterion.`genSuite(samples, 10, BenchmarRanking::rankTestSuiteKuhn, 75);
-            // var khunTestSuite = khunCriterion.genSuite(samples, 10, BenchmarRanking::rankTestSuiteNext, 65);
+            var khunTestSuite = khunCriterion.genSuite(samples, SUITE_SIZE, BenchmarRanking::rankTestSuiteKuhn, 55);
             for (var test : khunTestSuite) {
                 List<String> eventList = test.stream().collect(Collectors.toList());
 
@@ -147,7 +139,6 @@ public class UsageExampleTable2 {
                 FileWriter writer = new FileWriter(fileName, (i==0 ? false: true));
 
                 writer.write("// "+reportDuration()+"\r\n");
-//                writer.write ("// Kuhn's operator generated a suite with rank -"+BenchmarRanking.rankTestSuiteNext(khunTestSuite)+", No-"+i+"\r\n");
                 writer.write ("// Kuhn's operator generated a suite with rank -"+BenchmarRanking.rankTestSuiteKuhn(khunTestSuite)+", No-"+i+"\r\n");
                 for (var test : khunTestSuite) {
                     writer.write(test.stream().map(e -> e).collect(Collectors.joining(","))+"\r\n");
@@ -206,17 +197,7 @@ public class UsageExampleTable2 {
 
     static class BenchmarRanking {
         @NotNull
-        static final BEvent GOAL = new BEvent("success");
-        static final double[] eithnDMP = {1, 0.9, 0.81, 0.73, 0.66, 0.59, 0.53, 0.48, 0.43, 0.39, 0.35}; // 0.1
-//        static final double[] eithnDMP = {1, 0.1, 0.01, 0.001, 0.0001, 0.0001, 0.0001,0.0001, 0.0001,0.0001, 0.0001}; // 0.1
 
-        static class RankingCriteria {
-            public RankingCriteria(boolean reachedGoal) {
-                this.reachedGoal = reachedGoal;
-            }
-
-            final boolean reachedGoal;
-        }
         //rankTestSuiteOld - original ranking test suite - find the suite that at least each GOAL events appears 9 times
         static public int rankTestSuiteNext(@NotNull Set<List<String>> testSuite) {
 
@@ -231,7 +212,6 @@ public class UsageExampleTable2 {
 
             }
             Map<String, Long> hm = newTestSuite.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
-//            out.println("set after-"+hm.size()+" "+hm.toString());
             return hm.size();
         }
 
@@ -250,7 +230,6 @@ public class UsageExampleTable2 {
                 }
             }
             Map<String, Long> hm = newTestSuite.stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
-//            out.println("set kuhn-"+hm.toString());
 
             return hm.size();
         }
